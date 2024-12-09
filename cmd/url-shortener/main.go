@@ -1,9 +1,14 @@
 package main
 
 import (
-	"golang.org/x/exp/slog"
 	"main/internal/config"
+	"main/internal/lib/logger/sl"
+	"main/internal/storage/sqlite"
 	"os"
+
+	"golang.org/x/exp/slog"
+	//_ "modernc.org/sqlite"
+	_"github.com/mattn/go-sqlite3" //init driver
 )
 
 const (
@@ -14,9 +19,20 @@ const (
 
 func main() {
 	cfg := config.MustLoad()
+
 	log := setupLogger(cfg.Env)
+
 	log.Info("starting url-shortener", slog.String("env", cfg.Env))
 	log.Debug("debug messages are enabled")
+
+	storage, err := sqlite.New(cfg.StoragePath)
+	if err != nil {
+		log.Error("faied to init storage", sl.Err(err))
+		os.Exit(1)
+	}
+
+
+	_ = storage
 
 }
 
